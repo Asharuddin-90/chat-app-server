@@ -5,6 +5,7 @@ interface IUser extends Document {
 	name: string
 	email: string
 	password: string
+	tokens: string[]
 	createdAt: Date
 	updatedAt: Date
 }
@@ -25,6 +26,11 @@ const userSchema: Schema = new Schema(
 			type: String,
 			required: true
 		},
+		tokens: [
+			{
+				type: String
+			}
+		],
 		createdAt: {
 			type: Date,
 			default: Date.now

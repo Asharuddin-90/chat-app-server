@@ -1,6 +1,7 @@
 import { hashPassword, verifyPassword } from '../../helper/authHelper'
 import { throwError } from '../../helper/throw-error'
 import { User } from '../../models/user/user'
+import jwt from 'jsonwebtoken'
 
 export async function create(data: any) {
 	try {
@@ -50,8 +51,10 @@ export async function create(data: any) {
 
 export async function login(email: string, password: string) {
 	try {
+		console.warn('email', email, 'pass', password)
 		// Find the user with the provided email
 		const user: any = await User.findOne({ email })
+		console.log(user, 'found atad')
 
 		// If no user with the email is found, throw an error
 		if (!user) {
@@ -66,12 +69,23 @@ export async function login(email: string, password: string) {
 			throwError(400, 'Invalid email or password')
 		}
 
-		// Destructure the user object and exclude the password field
-		const { password: excludedPassword, ...userWithoutPassword } =
-			user.toObject()
+		let tokens = user.tokens || []
+
+		const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY!, {
+			expiresIn: '1d'
+		})
+
+		// Add the new token to the tokens array in the user object
+		tokens.push(token)
+
+		// Update the user object with the new tokens array
+		user.tokens = tokens
+
+		// Save the updated user object
+		await user.save()
 
 		// Return the user data without the password
-		return userWithoutPassword
+		return { _id: user._id, email: user.email, name: user.name, token }
 	} catch (error: any) {
 		console.error(error)
 		throwError(error.status, error.error)
