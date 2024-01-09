@@ -5,6 +5,8 @@ import { connectDb } from './db'
 import morgan from 'morgan'
 import { useBodyParser, useEnhancedExpress } from './helper/server-helper'
 import auth from '../src/routes/auth/index'
+import user from '../src/routes/user/index'
+import { withAuth } from './middleware/authMiddleware'
 
 dotenv.config()
 
@@ -36,6 +38,9 @@ app.get('/api/hello', (req, res) => {
 
 //user auth
 app.use('/api/auth', auth)
+
+//all user
+app.use('/api/user', withAuth, user)
 
 // return 404 if request URL not found
 app.use((req, res) => {
