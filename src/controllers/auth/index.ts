@@ -53,7 +53,10 @@ export async function login(email: string, password: string) {
 	try {
 		console.warn('email', email, 'pass', password)
 		// Find the user with the provided email
-		const user: any = await User.findOne({ email })
+		const user: any = await User.findOne({
+			email: { $regex: new RegExp(email, 'i') }
+		})
+
 		console.log(user, 'found atad')
 
 		// If no user with the email is found, throw an error
